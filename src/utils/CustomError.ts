@@ -1,13 +1,13 @@
 export default class Err {
   public name: string | null = "CustomError"
-  public stack: Error | null = null
+  public stack: string | null = null
   constructor(
     public status: number,
     public message: string,
     public where: string | null = null,
     public identifire: string | null = null
   ) {
-    this.stack = new Error(this.message)
+    this.stack = new Error(this.message).stack ?? null
     if (process.env.ENVIRNOMENT === "production") {
       this.where = null
       this.identifire = null
@@ -16,3 +16,5 @@ export default class Err {
     }
   }
 }
+
+type A = typeof Err

@@ -10,7 +10,6 @@ export default class Youtube {
   protected RESULTS_PER_PAGE = 50
   protected totalResults = 0
 
-
   // get all the video id's from the playsist (Max 600 videos)
   protected getVideoIds = async (playlistId: string): Promise<string[]> => {
     let pageToken: string | null = null
@@ -68,6 +67,7 @@ export default class Youtube {
     try {
       for (let i = 0; i < maxLoopTime; i++) {
         const videoIdsStrChunk = videoIds.slice(50 * i, 50 * (i + 1)).join(",")
+
         const res = axios.get(this.VIDEOS_URL, {
           params: {
             part: "contentDetails",
