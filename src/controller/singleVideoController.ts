@@ -9,11 +9,11 @@ export const getVideoDetails = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { url } = req.query
+  const url = req.query.url as string
   if (!url) return next({ status: 400, message: "Bad Request" })
 
   try {
-    const vidRes = await yt.getSingleVideoDetails(url as string)
+    const vidRes = await yt.getSingleVideoDetails(url)
 
     res.status(200).json(vidRes)
   } catch (error: any) {

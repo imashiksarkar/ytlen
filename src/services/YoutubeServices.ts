@@ -19,7 +19,7 @@ export default class YtDetails extends Youtube {
   }
 
   // extract video id from the video url
-  private getVideoId = (videoUrl: string) => {
+  private getVideoIdFromASingleVideo = (videoUrl: string) => {
     const regex = /https:\/\/youtu.be\/([a-zA-Z0-9_-]+)/
     const idFound = videoUrl.match(regex)
 
@@ -32,8 +32,8 @@ export default class YtDetails extends Youtube {
   getPlaylistDetails = async (playlistURL: string): ResReturnType => {
     try {
       const playlistId = this.getPlaylistId(playlistURL)
-      const videoIds = await this.getVideoIds(playlistId)
-      const videosDurationString = await this.getVideosDurationString(videoIds)
+      const videoIdsArr = await this.getVideoIdsForAPlaylist(playlistId)
+      const videosDurationString = await this.getVideosDurationString(videoIdsArr)
 
       const totalLengthInSec =
         this.getTotalLengthInSeconds(videosDurationString)
@@ -48,16 +48,23 @@ export default class YtDetails extends Youtube {
     }
   }
 
+  getAllVideoIds = (urlArr: string[]): string[] => {
+    return urlArr.map((url) => this.getVideoIdFromASingleVideo(url))
+  }
+
+  // gets one or more videos details
   getSingleVideoDetails = async (url: string): ResReturnType => {
+    const urlArr = url.split(";")
+    const videoIdArr = this.getAllVideoIds(urlArr)
+
     try {
-      const videoId = this.getVideoId(url)
-      const vidDurationStr = await this.getVideosDurationString([videoId])
+      const vidDurationStr = await this.getVideosDurationString(videoIdArr)
       const durationInSec = this.getTotalLengthInSeconds(vidDurationStr)
 
       return {
         length: durationInSec,
         resultsPerPage: 1,
-        totalResults: 1,
+        totalResults: videoIdArr.length,
       }
     } catch (error) {
       throw error

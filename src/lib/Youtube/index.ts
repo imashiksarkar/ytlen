@@ -11,7 +11,9 @@ export default class Youtube {
   protected totalResults = 0
 
   // get all the video id's from the playsist (Max 600 videos)
-  protected getVideoIds = async (playlistId: string): Promise<string[]> => {
+  protected getVideoIdsForAPlaylist = async (
+    playlistId: string
+  ): Promise<string[]> => {
     let pageToken: string | null = null
     const videoIdsArr: string[] = []
 
@@ -33,7 +35,11 @@ export default class Youtube {
         // next page token for next request
         pageToken = data.nextPageToken
 
-        this.totalResults = this.totalResults || data.pageInfo.totalResults
+        if (!this.totalResults) {
+          this.totalResults = data.pageInfo.totalResults
+          if (data.pageInfo.totalResults > this.MAX_VIDEO_SUPPORT)
+            this.totalResults = this.MAX_VIDEO_SUPPORT
+        }
 
         // push all the video id's into the "videoIdsArr" array
         data.items.forEach((video) =>
@@ -55,6 +61,7 @@ export default class Youtube {
   ): Promise<string> => {
     let totalDurationString = ""
     const maxLoopTime = Math.ceil(videoIds.length / 50)
+
     const vidsPormises: Promise<{
       data: {
         items: {
@@ -66,8 +73,10 @@ export default class Youtube {
     }>[] = []
     try {
       for (let i = 0; i < maxLoopTime; i++) {
+        // concat 50 video ids at once then fetch details from the server
         const videoIdsStrChunk = videoIds.slice(50 * i, 50 * (i + 1)).join(",")
 
+        // requesr for every 50 videos (if possible)
         const res = axios.get(this.VIDEOS_URL, {
           params: {
             part: "contentDetails",
@@ -75,6 +84,7 @@ export default class Youtube {
             key: this.API_KEY,
           },
         })
+
         // store unresolved promises
         vidsPormises.push(res)
       }
