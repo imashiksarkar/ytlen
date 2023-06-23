@@ -1,21 +1,21 @@
-import { NextFunction, Request, Response } from "express"
+import { Request, Response, NextFunction } from "express"
+import Youtube from "../services/youtube.service"
 import Err from "../utils/CustomError"
-import Youtube from "../services/YoutubeServices"
 
 const yt = new Youtube()
 
-export const getVideoDetails = async (
+export const getPlaylistDetails = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const url = req.query.url as string
+  const { url } = req.query
   if (!url) return next({ status: 400, message: "Bad Request" })
 
   try {
-    const vidRes = await yt.getSingleVideoDetails(url)
+    const playlistRes = await yt.getPlaylistDetails(url as string)
 
-    res.status(200).json(vidRes)
+    res.status(200).json(playlistRes)
   } catch (error: any) {
     const Err = error as Err
     return next(Err)

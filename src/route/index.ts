@@ -1,6 +1,6 @@
 import { Router } from "express"
-import playlist from "./playlist"
-import singleVideo from "./singleVideo"
+import playlist from "./playlist.route"
+import singleVideo from "./single.video.route"
 
 const router = Router()
 
