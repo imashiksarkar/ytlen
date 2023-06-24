@@ -9,7 +9,10 @@ import dotenv from "dotenv"
 // init dotenv
 dotenv.config()
 
+// local imports
 import route from "./route"
+import errorMiddleware from "./middlewares/error.mw"
+import notFound from "./middlewares/notFound.mw"
 
 const app = express()
 
@@ -18,25 +21,12 @@ app.use(express.json())
 app.use("/api/v1", route)
 
 // helth check route
-app.use("/api/v1/helth", (req: Request, res: Response, next: NextFunction) => {
-  res.sendStatus(200)
-})
+app.use("/api/v1/helth")
 
 // 404 not found route
-app.use((req: Request, res: Response, next: NextFunction) => {
-  next({
-    status: 404,
-    message: "Not found!",
-  })
-})
+app.use(notFound)
 
-// Error handling middleware
-interface CustomErr extends ErrorRequestHandler {
-  status: number
-  message: string
-}
-app.use((err: CustomErr, req: Request, res: Response, next: NextFunction) => {
-  res.status(err.status).json(err)
-})
+// universal error handeler
+app.use(errorMiddleware)
 
 export default app
