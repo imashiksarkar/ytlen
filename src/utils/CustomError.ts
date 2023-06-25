@@ -5,6 +5,7 @@ export default class Err {
     public status: number,
     public message: string,
     public where: string | null = null,
+    public filePath: string | null = null,
     public identifire: string | null = null
   ) {
     this.stack = new Error(this.message).stack ?? null
@@ -16,5 +17,3 @@ export default class Err {
     }
   }
 }
-
-type A = typeof Err

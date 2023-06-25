@@ -20,6 +20,7 @@ export default class Youtube {
     const maxLoopTimes = Math.ceil(
       this.MAX_VIDEO_SUPPORT / this.RESULTS_PER_PAGE
     )
+
     for (let i = 0; i < maxLoopTimes; i++) {
       try {
         const { data } = (await axios.get(this.PLAYLIST_URL, {
@@ -48,7 +49,12 @@ export default class Youtube {
 
         if (!pageToken) break
       } catch (error) {
-        throw new Err(400, "Invalid Playlist Url", "getVideoIds()")
+        throw new Err(
+          400,
+          "Invalid Playlist Url",
+          "getVideoIdsForAPlaylist()",
+          __filename
+        )
       }
     }
 

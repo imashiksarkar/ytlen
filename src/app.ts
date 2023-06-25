@@ -1,6 +1,9 @@
 import express from "express"
 import dotenv from "dotenv"
 
+// init dotenv
+dotenv.config()
+
 // local imports
 import route from "./route"
 import errorMiddleware from "./middlewares/error.mw"
@@ -9,10 +12,9 @@ import helth from "./middlewares/helth.mw"
 
 const app = express()
 
-// init dotenv
-dotenv.config()
 app.use(express.json())
 
+// route for the app
 app.use("/api/v1", route)
 
 // helth check route
