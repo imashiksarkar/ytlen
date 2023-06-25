@@ -9,7 +9,7 @@ export default class Err {
     public identifire: string | null = null
   ) {
     this.stack = new Error(this.message).stack ?? null
-    if (process.env.ENVIRNOMENT === "production") {
+    if (process.env.NODE_ENVIRNOMENT === "production") {
       this.where = null
       this.identifire = null
       this.name = null
