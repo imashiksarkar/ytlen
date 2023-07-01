@@ -1,7 +1,5 @@
-import app from "./app"
+import bootstrap from "./app"
 
-const PORT = process.env.PORT || 5000
+const PORT = Number(process.env.PORT || 5000)
 
-app.listen(PORT, () => {
-  console.log(`app is liestening on http://localhost:${PORT}`)
-})
+bootstrap(PORT)
