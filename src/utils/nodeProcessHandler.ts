@@ -1,4 +1,4 @@
-import Err from "./CustomError"
+import { Err } from "http-staror"
 
 // catch an unhandled error
 process.on("uncaughtException", (error: Err) => {

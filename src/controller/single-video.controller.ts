@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
-import Err from "../utils/CustomError"
 import Youtube from "../services/youtube.service"
+import { Err } from "http-staror"
 
 const yt = new Youtube()
 

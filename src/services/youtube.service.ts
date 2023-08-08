@@ -1,5 +1,5 @@
 import Youtube from "../lib/Youtube"
-import Err from "../utils/CustomError"
+import { Err } from "http-staror"
 
 type ResReturnType = Promise<{
   length: number
@@ -13,7 +13,11 @@ export default class YtDetails extends Youtube {
     const regex = /playlist\?list=([a-zA-Z0-9_-]+)/
 
     const match = playlistLink.match(regex)
-    if (!match) throw new Err(400, "Invalid Playlist Url", "getPlaylistId()")
+
+    if (!match)
+      throw Err.setStatus("BadRequest")
+        .setMessage("Invalid Playlist Url")
+        .setWhere("getPlaylistId()")
 
     return match[1]
   }
@@ -24,7 +28,9 @@ export default class YtDetails extends Youtube {
     const idFound = videoUrl.match(regex)
 
     if (!idFound) {
-      throw new Err(400, "Invalid Video Url", "getSingleVideoDetails()")
+      throw Err.setStatus("BadRequest")
+        .setMessage("Invalid Video Url")
+        .setWhere("getSingleVideoDetails()")
     }
     return idFound[1]
   }
@@ -33,7 +39,9 @@ export default class YtDetails extends Youtube {
     try {
       const playlistId = this.getPlaylistId(playlistURL)
       const videoIdsArr = await this.getVideoIdsForAPlaylist(playlistId)
-      const videosDurationString = await this.getVideosDurationString(videoIdsArr)
+      const videosDurationString = await this.getVideosDurationString(
+        videoIdsArr
+      )
 
       const totalLengthInSec =
         this.getTotalLengthInSeconds(videosDurationString)

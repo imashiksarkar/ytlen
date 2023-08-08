@@ -1,5 +1,5 @@
 import axios from "axios"
-import Err from "../../utils/CustomError"
+import { Err  } from "http-staror"
 import type { AxiosResponseType } from "./index.d"
 
 export default class Youtube {
@@ -49,12 +49,10 @@ export default class Youtube {
 
         if (!pageToken) break
       } catch (error) {
-        throw new Err(
-          400,
-          "Invalid Playlist Url",
-          "getVideoIdsForAPlaylist()",
-          __filename
-        )
+        throw Err.setStatus("BadRequest")
+          .setMessage("Invalid Playlist Url")
+          .setFilePath(__dirname)
+          .setWhere("getVideoIdsForAPlaylist()")
       }
     }
 
@@ -108,7 +106,9 @@ export default class Youtube {
         return totalDurationString
       })
     } catch (error) {
-      throw new Err(500, "Internal Server Error", "getVideosDurationString()")
+      throw Err.setStatus("InternalServerError").setWhere(
+        "getVideosDurationString()"
+      )
     }
   }
 
