@@ -7,7 +7,7 @@ const gracefulShutdown = (
   process.on("SIGINT", () => {
     console.log("graceful shutdown. (sigint)")
 
-    // winstone
+    // winston
     server.close(() => process.exit(0))
   })
 
@@ -15,7 +15,7 @@ const gracefulShutdown = (
   process.on("SIGTERM", () => {
     console.log("graceful shutdown. (sigterm)")
 
-    // winstone
+    // winston
     server.close(() => process.exit(0))
   })
 }

@@ -1,6 +1,6 @@
 import axios from "axios"
 import { Err  } from "http-staror"
-import type { AxiosResponseType } from "./index.d"
+import type { AxiosResponseType } from "./index.types"
 
 export default class Youtube {
   private API_KEY = process.env.API_KEY
@@ -10,7 +10,7 @@ export default class Youtube {
   protected RESULTS_PER_PAGE = 50
   protected totalResults = 0
 
-  // get all the video id's from the playsist (Max 600 videos)
+  // get all the video id's from the playlist (Max 600 videos)
   protected getVideoIdsForAPlaylist = async (
     playlistId: string
   ): Promise<string[]> => {
@@ -66,7 +66,7 @@ export default class Youtube {
     let totalDurationString = ""
     const maxLoopTime = Math.ceil(videoIds.length / 50)
 
-    const vidsPormises: Promise<{
+    const vidsPromises: Promise<{
       data: {
         items: {
           contentDetails: {
@@ -80,7 +80,7 @@ export default class Youtube {
         // concat 50 video ids at once then fetch details from the server
         const videoIdsStrChunk = videoIds.slice(50 * i, 50 * (i + 1)).join(",")
 
-        // requesr for every 50 videos (if possible)
+        // request for every 50 videos (if possible)
         const res = axios.get(this.VIDEOS_URL, {
           params: {
             part: "contentDetails",
@@ -90,11 +90,11 @@ export default class Youtube {
         })
 
         // store unresolved promises
-        vidsPormises.push(res)
+        vidsPromises.push(res)
       }
 
       // resolve all promises
-      return Promise.all(vidsPormises).then((res) => {
+      return Promise.all(vidsPromises).then((res) => {
         // loop over all the resolved promises
         res.forEach((singlePromise) => {
           // loop over individual resolved promise items
