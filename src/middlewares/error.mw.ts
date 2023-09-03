@@ -1,23 +1,11 @@
-import type {
-  Request,
-  Response,
-  ErrorRequestHandler,
-  NextFunction,
-} from "express"
-
-// Error handling middleware
-interface CustomErr extends ErrorRequestHandler {
-  status: number
-  message: string
-}
+import type { Request, Response, NextFunction } from "express"
+import { Err } from "http-staror"
 
 const errorMiddleware = (
-  err: CustomErr,
-  req: Request,
+  err: Err,
+  _req: Request,
   res: Response,
-  next: NextFunction
-) => {
-  res.status(err.status).json(err)
-}
+  _next: NextFunction
+) => res.status(err.statusCode).json(err)
 
 export default errorMiddleware

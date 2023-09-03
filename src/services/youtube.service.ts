@@ -16,7 +16,7 @@ export default class YtDetails extends Youtube {
 
     if (!match)
       throw Err.setStatus("BadRequest")
-        .setMessage("Invalid Playlist Url")
+        .setMessage("Invalid Playlist Url!")
         .setWhere("getPlaylistId()")
 
     return match[1]
@@ -29,12 +29,13 @@ export default class YtDetails extends Youtube {
 
     if (!idFound) {
       throw Err.setStatus("BadRequest")
-        .setMessage("Invalid Video Url")
+        .setMessage("Invalid Video Url!")
         .setWhere("getSingleVideoDetails()")
     }
     return idFound[1]
   }
 
+  // returns playlist duration details given a playlist url
   getPlaylistDetails = async (playlistURL: string): ResReturnType => {
     try {
       const playlistId = this.getPlaylistId(playlistURL)
@@ -56,13 +57,14 @@ export default class YtDetails extends Youtube {
     }
   }
 
+  // returns a video ids' array given a video urls' array
   getAllVideoIds = (urlArr: string[]): string[] => {
     return urlArr.map((url) => this.getVideoIdFromASingleVideo(url))
   }
 
-  // gets one or more videos details
-  getSingleVideoDetails = async (url: string): ResReturnType => {
-    const urlArr = url.split(";")
+  // returns videos duration given one or multiple videos url
+  getVideoDetails = async (url: string): ResReturnType => {
+    const urlArr = url.split(";") // video url's array
     const videoIdArr = this.getAllVideoIds(urlArr)
 
     try {

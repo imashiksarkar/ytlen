@@ -2,12 +2,11 @@ import express from "express"
 import dotenv from "dotenv"
 import helmet from "helmet"
 
-
 // init dotenv
 dotenv.config()
 
 // local imports
-import "./utils/nodeProcessHandler"
+import "./utils/nodeProcessHandler" // catch unhandled error
 import gracefulShutdown from "./utils/gracefulShutdown"
 import route from "./route"
 import errorMiddleware from "./middlewares/error.mw"
@@ -32,13 +31,14 @@ app.all("*", notFound)
 // universal error handler
 app.use(errorMiddleware)
 
+const startLog = (port: number) => () => {
+  console.log(
+    `App is listening on http://localhost:${port}\nNode Process ID is ${process.pid}`
+  )
+}
+
 const bootstrap = (port: number): void => {
-  const server = app.listen(port, () => {
-    console.log(
-      `App is listening on http://localhost:${port}
-Node Process ID is ${process.pid}`
-    )
-  })
+  const server = app.listen(port, startLog(port))
 
   gracefulShutdown(server)
 }

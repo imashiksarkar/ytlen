@@ -1,6 +1,19 @@
 import axios from "axios"
-import { Err  } from "http-staror"
-import type { AxiosResponseType } from "./index.types"
+import { Err } from "http-staror"
+
+interface AxiosResponseType {
+  data: {
+    pageInfo: { totalResults: number; resultsPerPage: number }
+    nextPageToken: string
+    items: {
+      snippet: {
+        resourceId: {
+          videoId: string
+        }
+      }
+    }[]
+  }
+}
 
 export default class Youtube {
   private API_KEY = process.env.API_KEY
@@ -10,7 +23,7 @@ export default class Youtube {
   protected RESULTS_PER_PAGE = 50
   protected totalResults = 0
 
-  // get all the video id's from the playlist (Max 600 videos)
+  // get all the video ids' with the playlist id (Max 600 videos)
   protected getVideoIdsForAPlaylist = async (
     playlistId: string
   ): Promise<string[]> => {
@@ -50,7 +63,7 @@ export default class Youtube {
         if (!pageToken) break
       } catch (error) {
         throw Err.setStatus("BadRequest")
-          .setMessage("Invalid Playlist Url")
+          .setMessage("Invalid Playlist ID!")
           .setFilePath(__dirname)
           .setWhere("getVideoIdsForAPlaylist()")
       }
@@ -59,7 +72,7 @@ export default class Youtube {
     return videoIdsArr
   }
 
-  // get all the videos details for the given video id's
+  // get all the videos duration in one string for the given video ids'
   protected getVideosDurationString = async (
     videoIds: string[]
   ): Promise<string> => {
@@ -112,7 +125,7 @@ export default class Youtube {
     }
   }
 
-  // get total length in seconds
+  // get total length in seconds from the duration string
   protected getTotalLengthInSeconds = (durationStr: string) => {
     const regEx = /\d+[HMS]/g
 

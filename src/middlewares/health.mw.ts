@@ -1,7 +1,7 @@
-import type { NextFunction, Request, Response } from "express"
+import type { Request, Response } from "express"
+import { Status } from "http-staror"
 
-const healthCheck = (req: Request, res: Response, next: NextFunction) => {
-  res.sendStatus(200)
-}
+const healthCheck = (_req: Request, res: Response) =>
+  res.sendStatus(Status.Ok.code)
 
 export default healthCheck
