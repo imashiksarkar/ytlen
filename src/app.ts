@@ -1,17 +1,16 @@
+import "./utils/nodeProcessHandler" // catch unhandled error
+import "./utils/validatedEnv" // validate env
+
+// packages import
 import express from "express"
-import dotenv from "dotenv"
 import helmet from "helmet"
 
-// init dotenv
-dotenv.config()
-
-// local imports
-import "./utils/nodeProcessHandler" // catch unhandled error
-import gracefulShutdown from "./utils/gracefulShutdown"
-import route from "./route"
+// local import
 import errorMiddleware from "./middlewares/error.mw"
-import notFound from "./middlewares/notFound.mw"
 import health from "./middlewares/health.mw"
+import notFound from "./middlewares/notFound.mw"
+import route from "./route"
+import gracefulShutdown from "./utils/gracefulShutdown"
 
 const app = express()
 
@@ -38,6 +37,8 @@ const startLog = (port: number) => () => {
 }
 
 const bootstrap = (port: number): void => {
+  console.log("boot", port)
+
   const server = app.listen(port, startLog(port))
 
   gracefulShutdown(server)

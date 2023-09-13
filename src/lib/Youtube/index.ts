@@ -1,5 +1,6 @@
 import axios from "axios"
 import { Err } from "http-staror"
+import env from "../../utils/validatedEnv"
 
 interface AxiosResponseType {
   data: {
@@ -16,7 +17,7 @@ interface AxiosResponseType {
 }
 
 export default class Youtube {
-  private API_KEY = process.env.API_KEY
+  private API_KEY = env.apiKey
   private PLAYLIST_URL = `https://www.googleapis.com/youtube/v3/playlistItems`
   private VIDEOS_URL = `https://www.googleapis.com/youtube/v3/videos`
   protected MAX_VIDEO_SUPPORT = 600

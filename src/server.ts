@@ -1,5 +1,6 @@
 import bootstrap from "./app"
+import env from "./utils/validatedEnv"
 
-const PORT = Number(process.env.PORT || 5000)
+const PORT = env.port
 
 bootstrap(PORT)
