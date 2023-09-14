@@ -6,8 +6,6 @@ import helmet from "helmet"
 
 // local import
 import errorMiddleware from "./middlewares/error.mw"
-import health from "./middlewares/health.mw"
-import notFound from "./middlewares/notFound.mw"
 import route from "./route"
 import gracefulShutdown from "./utils/gracefulShutdown"
 import logger from "./utils/logger"
