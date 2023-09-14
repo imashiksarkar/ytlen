@@ -1,4 +1,4 @@
-import { Err } from "http-staror"
+import type { Err } from "http-staror"
 import logger from "../utils/logger"
 import env from "./validatedEnv"
 

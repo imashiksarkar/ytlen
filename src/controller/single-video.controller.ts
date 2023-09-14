@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from "express"
+import type { NextFunction, Request, Response } from "express"
 import Youtube from "../services/youtube.service"
-import { Err, Http, Status } from "http-staror"
+import { type Err, Http, Status } from "http-staror"
 
 const yt = new Youtube()
 

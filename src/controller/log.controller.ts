@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express"
+import type { NextFunction, Request, Response } from "express"
 import { Http } from "http-staror"
 import { createReadStream } from "node:fs"
 

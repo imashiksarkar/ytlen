@@ -1,4 +1,4 @@
-import { Request, Response } from "express"
+import type { Request, Response } from "express"
 import { Status } from "http-staror"
 
 const healthCheck = (_req: Request, res: Response) =>

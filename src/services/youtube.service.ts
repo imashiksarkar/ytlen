@@ -37,6 +37,7 @@ export default class YtDetails extends Youtube {
 
   // returns playlist duration details given a playlist url
   getPlaylistDetails = async (playlistURL: string): ResReturnType => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const playlistId = this.getPlaylistId(playlistURL)
       const videoIdsArr = await this.getVideoIdsForAPlaylist(playlistId)
@@ -67,6 +68,7 @@ export default class YtDetails extends Youtube {
     const urlArr = url.split(";") // video url's array
     const videoIdArr = this.getAllVideoIds(urlArr)
 
+    // eslint-disable-next-line no-useless-catch
     try {
       const vidDurationStr = await this.getVideosDurationString(videoIdArr)
       const durationInSec = this.getTotalLengthInSeconds(vidDurationStr)

@@ -1,4 +1,4 @@
-import { IncomingMessage, Server, ServerResponse } from "http"
+import type { IncomingMessage, Server, ServerResponse } from "http"
 import logger from "../utils/logger"
 
 const gracefulShutdown = (
