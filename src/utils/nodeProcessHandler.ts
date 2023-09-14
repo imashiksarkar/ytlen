@@ -1,15 +1,17 @@
 import { Err } from "http-staror"
+import logger from "../utils/logger"
+import env from "./validatedEnv"
 
 // catch an unhandled error
 process.on("uncaughtException", (error: Err) => {
-  // winston
-  console.log("uncaughtException", error.message)
+  if (env.nodeEnv === "development") console.error("uncaughtException")
+  logger.error(`[ uncaughtException ] ${error.message}`)
   process.exit(1)
 })
 
 // catch an unhandled promise rejection
-process.on("unhandledRejection", (error: string) => {
-  // winston
-  console.log("unhandledRejection", error)
+process.on("unhandledRejection", (errorMessage: string) => {
+  if (env.nodeEnv === "development") console.error("unhandledRejection")
+  logger.error(`[ unhandledRejection ] ${errorMessage}`)
   process.exit(1)
 })

@@ -14,7 +14,7 @@ export const getVideoDetails = async (
 
   try {
     const vidRes = await yt.getVideoDetails(url)
-    res.status(Status.Ok.code).json(vidRes)
+    return res.status(Status.Ok.code).json(vidRes)
   } catch (error: unknown) {
     const Err = error as Err
     return next(Err)

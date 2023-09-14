@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express"
+import { NextFunction, Request, Response } from "express"
+import { Err, Http, Status } from "http-staror"
 import Youtube from "../services/youtube.service"
-import { Err, Http,Status } from "http-staror"
 
 const yt = new Youtube()
 
@@ -14,7 +14,7 @@ export const getPlaylistDetails = async (
 
   try {
     const playlistRes = await yt.getPlaylistDetails(url)
-    res.status(Status.Ok.code).json(playlistRes)
+    return res.status(Status.Ok.code).json(playlistRes)
   } catch (error: unknown) {
     const Err = error as Err
     return next(Err)

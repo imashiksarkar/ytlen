@@ -1,0 +1,4 @@
+14-09-2023 06:58:01 PM | [info] | [ Startup ] App is listening on http://localhost:5000 - With Node Process ID is 290344
+14-09-2023 06:58:12 PM | [error] | Status Code: 404 - Error: {"status":"NotFound","statusCode":404,"message":"(/api/v1/yt/logsa?aa=bb&xx=yy) Route not found!"}
+14-09-2023 06:58:31 PM | [info] | [ Kill 290344 ] Graceful shutdown.
+14-09-2023 06:58:39 PM | [info] | [ Ctrl + C ] Graceful shutdown.
