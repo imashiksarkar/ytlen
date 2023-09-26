@@ -28,6 +28,7 @@ if (env.nodeEnv === "production") {
         level: "info",
         dirname: "logs",
         filename: "info.log",
+        maxsize: 1024 * 10,
       }),
     ],
   })

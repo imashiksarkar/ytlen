@@ -1,4 +1,12 @@
 {
   "prettier.semi": false,
-  "cSpell.words": ["staror", "tsbuildinfo"]
+  "cSpell.words": ["staror", "tsbuildinfo"],
+  "cSpell.customDictionaries": {
+    "custom-dictionary-workspace": {
+      "name": "custom-dictionary-workspace",
+      "path": "${workspaceFolder:yt_playlist-duration_calculator}/.cspell/custom-dictionary-workspace.txt",
+      "addWords": true,
+      "scope": "workspace"
+    }
+  }
 }
