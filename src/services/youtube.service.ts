@@ -1,4 +1,4 @@
-import Youtube from "../lib/Youtube"
+import Youtube from "../libs/Youtube"
 import { Err } from "http-staror"
 
 type ResReturnType = Promise<{

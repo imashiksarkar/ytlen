@@ -6,7 +6,7 @@ import helmet from "helmet"
 
 // local import
 import errorMiddleware from "./middlewares/error.mw"
-import route from "./route"
+import route from "./routes"
 import gracefulShutdown from "./utils/gracefulShutdown"
 import logger from "./utils/logger"
 import env from "./utils/validatedEnv"
