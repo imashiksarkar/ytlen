@@ -1,6 +1,4 @@
 import bootstrap from "./app"
-import env from "./utils/validatedEnv"
+import ValidatedEnv from "./libs/utils/ValidatedEnv"
 
-const PORT = env.port
-
-bootstrap(PORT)
+bootstrap(ValidatedEnv.port)

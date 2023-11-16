@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from "express"
+import type {  Request, Response } from "express"
 import Youtube from "../services/youtube.service"
 import { type Err, Http, Status } from "http-staror"
 
@@ -7,7 +7,7 @@ const yt = new Youtube()
 export const getVideoDetails = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFn
 ) => {
   const url = req.query.url as string
   if (!url) return next(Http.setStatus("BadRequest").setMessage("Invalid URL!"))

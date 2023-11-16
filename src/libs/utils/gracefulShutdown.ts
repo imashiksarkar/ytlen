@@ -1,5 +1,5 @@
 import type { IncomingMessage, Server, ServerResponse } from "http"
-import logger from "../utils/logger"
+import { logger } from "../utils"
 
 const gracefulShutdown = (
   server: Server<typeof IncomingMessage, typeof ServerResponse>

@@ -1,6 +1,6 @@
 import dayjs from "dayjs"
 import { createLogger, format, transports } from "winston"
-import env from "./validatedEnv"
+import env from "./ValidatedEnv"
 
 const logFormat = ({ timestamp, level, message }: any) => {
   const ts = dayjs(timestamp)

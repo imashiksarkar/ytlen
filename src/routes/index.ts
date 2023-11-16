@@ -1,12 +1,12 @@
 import { Router } from "express"
-import playlist from "./playlist.route"
-import singleVideo from "./single-video.route"
-import health from "./health.route"
-import log from "./log.route"
-import notFound from "./notFound.route"
+import healthRoute from "./health.route"
+import logRoute from "./log.route"
+import playlistRoute from "./playlist.route"
+import singleVideoRoute from "./single-video.route"
 
 const router = Router()
 
-router.use("/yt", playlist, singleVideo, log, health, notFound)
+router.use(healthRoute)
+router.use("/yt", playlistRoute, singleVideoRoute, logRoute)
 
 export default router

@@ -1,7 +1,7 @@
-import type { NextFunction, Request, Response } from "express"
+import type {  Request, Response } from "express"
 import { Http } from "http-staror"
 
-const notFound = (req: Request, _res: Response, next: NextFunction) =>
+const notFound = (req: Request, _res: Response, next: NextFn) =>
   next(
     Http.setStatus("NotFound").setMessage(
       `(${req.originalUrl}) Route not found!`

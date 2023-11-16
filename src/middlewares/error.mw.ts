@@ -1,13 +1,12 @@
-import type { Request, Response, NextFunction } from "express"
+import type { Request, Response } from "express"
 import { type Err } from "http-staror"
-import logger from "../utils/logger"
+import logger from "../libs/utils/logger"
 
 const errorMiddleware = (
   err: Err,
   _req: Request,
   res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _next: NextFunction
+  _next: NextFn
 ) => {
   logger.error(`Status Code: ${err.statusCode} - Error: ${JSON.stringify(err)}`)
   return res.status(err.statusCode).json(err)

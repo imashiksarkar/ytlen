@@ -1,5 +1,5 @@
 import { Router } from "express"
-import health from "../middlewares/health.mw"
+import health from "../controllers/health.controller"
 
 const router = Router()
 
