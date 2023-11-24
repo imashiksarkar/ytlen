@@ -16,5 +16,11 @@
     "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "exclude": ["src/__raff__", "src/__raff__/**/*"]
+  "exclude": [
+    "src/__raff__",
+    "src/__raff__/**/*",
+    "src/__test__",
+    "src/__test__/**/*",
+    "src/**/*.spec.ts"
+  ]
 }
