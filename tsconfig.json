@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     /* Language and Environment */
-    "target": "es2016" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "target": "ES2022" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
     /* Modules */
-    "module": "commonjs" /* Specify what module code is generated. */,
+    "moduleResolution": "NodeNext" /* Specify what module code is generated. */,
+    "module": "NodeNext" /* Specify what module code is generated. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "noEmitOnError": true /* Do not compile while having error */,
@@ -12,6 +13,7 @@
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
     /* Type Checking */
     "strict": true /* Enable all strict type-checking options. */,
+    "noImplicitAny": true,
     /* Completeness */
     "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */

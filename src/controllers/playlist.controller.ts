@@ -13,7 +13,7 @@ export const getPlaylistDetails = async (
   if (!url) return next(Http.setStatus("BadRequest").setMessage("Invalid URL!"))
 
   try {
-    const playlistRes = await yt.getPlaylistDetails(url)
+    const playlistRes = await yt.getDuration(url)
     return res.status(Status.Ok.code).json(playlistRes)
   } catch (error: unknown) {
     const Err = error as Err

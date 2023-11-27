@@ -13,7 +13,7 @@ export const getVideoDetails = async (
   if (!url) return next(Http.setStatus("BadRequest").setMessage("Invalid URL!"))
 
   try {
-    const vidRes = await yt.getVideoDetails(url)
+    const vidRes = await yt.getDuration(url)
     return res.status(Status.Ok.code).json(vidRes)
   } catch (error: unknown) {
     const Err = error as Err
