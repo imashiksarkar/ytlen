@@ -1,4 +1,4 @@
-import ytLib from "../libs/Youtube"
+import ytLib from "./Youtube"
 
 const yt = new ytLib()
 
