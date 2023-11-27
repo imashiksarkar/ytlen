@@ -1,14 +1,13 @@
 import { Err } from "http-staror"
 import Youtube, { type IAxiosResponseType } from "../libs/Youtube"
 
-type ResReturnType = Promise<{
+interface IDurationReturnType {
   length: number
   totalResults: number
-  resultsPerPage: number
-}>
+}
 
 export default class YtDetails extends Youtube {
-  getDuration = async (urls: string): ResReturnType => {
+  getDuration = async (urls: string): Promise<IDurationReturnType> => {
     const urlStringsArray = this.parseVideosAndPlaylistsIdsFromUrl(urls)
 
     if (!urlStringsArray)
@@ -18,12 +17,48 @@ export default class YtDetails extends Youtube {
 
     const videoIdsString = await this.getVideoIdsString(videoIdsArr)
 
-    // loop for every 50 videos ( promise.all() )
-    const duration = await this.fetchVideosDuration(videoIdsString)
+    if (videoIdsString.length < 11)
+      throw Err.setStatus("BadRequest").setMessage("Invalid Url!")
 
-    const durationString = this.getDurationString(duration)
+    const fetchVideosDurationPromises: Promise<IAxiosResponseType>[] = []
 
-    return this.getTotalLengthInSeconds(durationString)
+    this.strSlice(videoIdsString, (slicedVideoIdsString: string) => {
+      // loop for every 50 videos ( promise.all() )
+      fetchVideosDurationPromises.push(
+        this.fetchVideosDuration(slicedVideoIdsString)
+      )
+    })
+
+    const videosDuration = await Promise.all(fetchVideosDurationPromises)
+
+    let totalResults = 0
+    let totalDurationString = ""
+    videosDuration.forEach((duration) => {
+      totalResults += duration.data.pageInfo.totalResults
+      const durationString = this.getDurationString(duration)
+      totalDurationString += durationString
+    })
+
+    return {
+      length: this.getTotalLengthInSeconds(totalDurationString),
+      totalResults,
+    }
+  }
+
+  private strSlice = (videoIds: string, cb: (res: string) => void) => {
+    const numberOfIdsAtOnce = this.RESULTS_PER_PAGE
+    const idLen = numberOfIdsAtOnce * 11 + (numberOfIdsAtOnce - 1)
+
+    let start = 0
+    let end = idLen
+
+    while (true) {
+      const strChunk = videoIds.slice(start, end)
+      if (strChunk.length < 10) break
+      start = end + 1
+      end = start + idLen
+      cb(strChunk)
+    }
   }
 
   private getDurationString = (duration: IAxiosResponseType) =>
@@ -39,7 +74,7 @@ export default class YtDetails extends Youtube {
   // videos ids will have "/" and playlist ids will have "=" as prefix
   private parseVideosAndPlaylistsIdsFromUrl = (url: string) =>
     url
-      .match(/(\/(\w{11}))|(=(\w{34}))/g)
+      .match(/(\/[a-z0-9_-]{11})|(=[a-z0-9_-]{34})/gi)
       ?.map((idWithPrefix) => idWithPrefix.slice(1))
 
   /**
@@ -54,8 +89,12 @@ export default class YtDetails extends Youtube {
   private getVideosIdsArray = async (
     videosAndPlaylistsIdsFromUrl: string[]
   ) => {
-    const playlistsIndexInIdStrArr: [number, string][] = []
     const idStrArr: (string | string[])[] = []
+    const mapPlylstIndxToIdStrArr: number[] = []
+    // promises of playlist fetch
+    const playlistsPromises: Promise<string[]>[] = []
+
+    // const playlistsIndexesAndPromises: [number[]] = [[], []]
 
     const maxLoopTime = Math.min(
       videosAndPlaylistsIdsFromUrl?.length || 0,
@@ -68,45 +107,57 @@ export default class YtDetails extends Youtube {
       if (this.isVideoId(id)) {
         idStrArr.push(id)
       } else if (this.isPlaylistId(id)) {
-        playlistsIndexInIdStrArr.push([idStrArr.length, id])
+        // current index is to be populated
+        mapPlylstIndxToIdStrArr.push(idStrArr.length)
+
+        // store the promises
+        playlistsPromises.push(this.fetchPlaylist(id))
+
+        // add empty array for now, later it will be populated with actual array of video ids
         idStrArr.push([])
       }
     }
 
     let numberOfIdsFilled = 0,
-      remainingSpaceForIds = this.RESULTS_PER_PAGE
+      remainingSpaceForIds = this.MAX_VIDEO_SUPPORT
 
-    // populate the ids array with playlist's ids
-    for (let i = 0; i < playlistsIndexInIdStrArr.length; i++) {
-      // current playlist id index in idStrArr
-      const currentPointer = playlistsIndexInIdStrArr[i][0]
-      const currentPlaylistId = playlistsIndexInIdStrArr[i][1]
+    // fetch the playlists here (populate)
+    try {
+      const resolvedPlaylists = await Promise.all(playlistsPromises)
 
-      // video ids in between playlist ids
-      const leftOverVal =
-        i > 0 ? currentPointer - playlistsIndexInIdStrArr[i - 1][0] - 1 : 0
+      mapPlylstIndxToIdStrArr.forEach((currPlaylistIndxInIdStrArr, index) => {
+        // for the first time, number of previously filled ids
+        if (index === 0) {
+          numberOfIdsFilled = currPlaylistIndxInIdStrArr
+          remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
+        } else {
+          // here index can't be 0
 
-      // if there are left over values
-      remainingSpaceForIds -= leftOverVal
-      numberOfIdsFilled = this.RESULTS_PER_PAGE - remainingSpaceForIds
+          const prevPlylstIndxInIdStrArr = mapPlylstIndxToIdStrArr[index - 1]
 
-      if (numberOfIdsFilled >= this.RESULTS_PER_PAGE) break
+          // the number of video ids are skipped between two playlist ids
+          const skippedIds =
+            currPlaylistIndxInIdStrArr - prevPlylstIndxInIdStrArr - 1
 
-      // get the playlist ids here (fetch the playlists)
-      const randomPlaylistIds = await this.fetchPlaylist(currentPlaylistId)
-      // splice the ids for the remaining's, cut down extras
-      randomPlaylistIds.splice(remainingSpaceForIds)
+          numberOfIdsFilled += skippedIds
+          remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
+        }
 
-      // update the playlists id status
-      numberOfIdsFilled = randomPlaylistIds.length + numberOfIdsFilled
-      remainingSpaceForIds = Math.max(
-        0,
-        this.RESULTS_PER_PAGE - numberOfIdsFilled
+        const currentPlaylist = resolvedPlaylists[index]
+        currentPlaylist.splice(remainingSpaceForIds) // fix the current playlist size
+
+        // calculate the remaining's and filled's
+        numberOfIdsFilled += currentPlaylist.length
+        remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
+
+        // populate the playlist ids
+        idStrArr[currPlaylistIndxInIdStrArr] = currentPlaylist
+        idStrArr.splice(currPlaylistIndxInIdStrArr + remainingSpaceForIds + 1)
+      })
+    } catch (error: unknown) {
+      throw Err.setStatus("InternalServerError").setMessage(
+        "Something went wrong!"
       )
-
-      idStrArr[currentPointer] = randomPlaylistIds
-
-      idStrArr.splice(currentPointer + remainingSpaceForIds + 1)
     }
 
     return idStrArr

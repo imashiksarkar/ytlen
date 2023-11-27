@@ -24,7 +24,8 @@ export default class Youtube {
   private PLAYLIST_URL = `https://www.googleapis.com/youtube/v3/playlistItems`
   private VIDEOS_URL = `https://www.googleapis.com/youtube/v3/videos`
   protected MAX_VIDEO_SUPPORT = 600
-  protected RESULTS_PER_PAGE = 50
+  protected RESULTS_PER_PAGE = 50 // max 50
+  protected VIDEO_ID_LENGTH = 11 // fixed
   protected totalResults = 0
 
   // get all the video ids' for the playlist (Max 600 videos)
@@ -41,7 +42,7 @@ export default class Youtube {
         const { data } = (await axios.get(this.PLAYLIST_URL, {
           params: {
             part: "snippet",
-            maxResults: 50,
+            maxResults: this.RESULTS_PER_PAGE,
             playlistId,
             pageToken,
             key: this.API_KEY,
