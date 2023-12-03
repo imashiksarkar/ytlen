@@ -1,6 +1,7 @@
 import type { Request, Response } from "express"
 import { Http } from "http-staror"
 import { createReadStream } from "node:fs"
+import { NextFn } from "../libs/utils/types"
 
 export const getLogs = (_req: Request, res: Response, next: NextFn) => {
   res.header("Content-Type", "Text/Plain")

@@ -1,5 +1,6 @@
-import type {  Request, Response } from "express"
+import type { Request, Response } from "express"
 import { Http } from "http-staror"
+import { NextFn } from "../libs/utils/types"
 
 const notFound = (req: Request, _res: Response, next: NextFn) =>
   next(

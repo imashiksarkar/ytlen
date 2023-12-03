@@ -1,6 +1,7 @@
 import type { Request, Response } from "express"
 import { type Err, Http, Status } from "http-staror"
 import Youtube from "../services/youtube.service"
+import { NextFn } from "../libs/utils/types"
 
 const yt = new Youtube()
 
