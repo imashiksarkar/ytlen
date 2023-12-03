@@ -1,7 +1,7 @@
-import type { Request, Response } from "express"
-import { type Err, Http, Status } from "http-staror"
-import Youtube from "../services/youtube.service"
-import { NextFn } from "../libs/utils/types"
+import type { Request, Response } from 'express'
+import { type Err, Http, Status } from 'http-staror'
+import Youtube from '../services/youtube.service'
+import { type NextFn } from '../libs/utils/types'
 
 const yt = new Youtube()
 
@@ -10,14 +10,18 @@ export const getPlaylistDetails = async (
   res: Response,
   next: NextFn
 ) => {
-  const url = req.query.url as string
-  if (!url) return next(Http.setStatus("BadRequest").setMessage("Invalid URL!"))
+  const url = req.query.url as string | undefined
+
+  if (!url?.trim()) {
+    next(Http.setStatus('BadRequest').setMessage('Invalid URL!'))
+    return
+  }
 
   try {
     const playlistRes = await yt.getDuration(url)
-    return res.status(Status.Ok.code).json(playlistRes)
+    res.status(Status.Ok.code).json(playlistRes)
   } catch (error: unknown) {
     const Err = error as Err
-    return next(Err)
+    next(Err)
   }
 }

@@ -1,5 +1,5 @@
-import { Err } from "http-staror"
-import Youtube, { type IAxiosResponseType } from "../libs/Youtube"
+import { Err } from 'http-staror'
+import Youtube, { type IAxiosResponseType } from '../libs/Youtube'
 
 interface IDurationReturnType {
   length: number
@@ -10,17 +10,19 @@ export default class YtDetails extends Youtube {
   getDuration = async (urls: string): Promise<IDurationReturnType> => {
     const urlStringsArray = this.parseVideosAndPlaylistsIdsFromUrl(urls)
 
-    if (!urlStringsArray)
-      throw Err.setStatus("BadRequest").setMessage("Url is invalid!")
+    if (!urlStringsArray) {
+      throw Err.setStatus('BadRequest').setMessage('Url is invalid!')
+    }
 
     const videoIdsArr = await this.getVideosIdsArray(urlStringsArray)
 
-    const videoIdsString = await this.getVideoIdsString(videoIdsArr)
+    const videoIdsString = this.getVideoIdsString(videoIdsArr)
 
-    if (videoIdsString.length < 11)
-      throw Err.setStatus("BadRequest").setMessage("Invalid Url!")
+    if (videoIdsString.length < 11) {
+      throw Err.setStatus('BadRequest').setMessage('Invalid Url!')
+    }
 
-    const fetchVideosDurationPromises: Promise<IAxiosResponseType>[] = []
+    const fetchVideosDurationPromises: Array<Promise<IAxiosResponseType>> = []
 
     this.strSlice(videoIdsString, (slicedVideoIdsString: string) => {
       // loop for every 50 videos ( promise.all() )
@@ -32,7 +34,7 @@ export default class YtDetails extends Youtube {
     const videosDuration = await Promise.all(fetchVideosDurationPromises)
 
     let totalResults = 0
-    let totalDurationString = ""
+    let totalDurationString = ''
     videosDuration.forEach((duration) => {
       totalResults += duration.data.pageInfo.totalResults
       const durationString = this.getDurationString(duration)
@@ -45,7 +47,7 @@ export default class YtDetails extends Youtube {
     }
   }
 
-  private strSlice = (videoIds: string, cb: (res: string) => void) => {
+  private readonly strSlice = (videoIds: string, cb: (res: string) => void) => {
     const numberOfIdsAtOnce = this.RESULTS_PER_PAGE
     const idLen = numberOfIdsAtOnce * 11 + (numberOfIdsAtOnce - 1)
 
@@ -61,18 +63,18 @@ export default class YtDetails extends Youtube {
     }
   }
 
-  private getDurationString = (duration: IAxiosResponseType) =>
+  private readonly getDurationString = (duration: IAxiosResponseType) =>
     duration.data.items.reduce(
       (prev, currItem) => prev + currItem.contentDetails.duration,
-      ""
+      ''
     )
 
-  private isVideoId = (id: string) => id.length === 11
+  private readonly isVideoId = (id: string) => id.length === 11
 
-  private isPlaylistId = (id: string) => id.length === 34
+  private readonly isPlaylistId = (id: string) => id.length === 34
 
   // videos ids will have "/" and playlist ids will have "=" as prefix
-  private parseVideosAndPlaylistsIdsFromUrl = (url: string) =>
+  private readonly parseVideosAndPlaylistsIdsFromUrl = (url: string) =>
     url
       .match(/(\/[a-z0-9_-]{11})|(=[a-z0-9_-]{34})/gi)
       ?.map((idWithPrefix) => idWithPrefix.slice(1))
@@ -86,13 +88,13 @@ export default class YtDetails extends Youtube {
    * vid-2
    * ]
    */
-  private getVideosIdsArray = async (
+  private readonly getVideosIdsArray = async (
     videosAndPlaylistsIdsFromUrl: string[]
   ) => {
-    const idStrArr: (string | string[])[] = []
+    const idStrArr: Array<string | string[]> = []
     const mapPlylstIndxToIdStrArr: number[] = []
     // promises of playlist fetch
-    const playlistsPromises: Promise<string[]>[] = []
+    const playlistsPromises: Array<Promise<string[]>> = []
 
     // const playlistsIndexesAndPromises: [number[]] = [[], []]
 
@@ -118,8 +120,8 @@ export default class YtDetails extends Youtube {
       }
     }
 
-    let numberOfIdsFilled = 0,
-      remainingSpaceForIds = this.MAX_VIDEO_SUPPORT
+    let numberOfIdsFilled = 0
+    let remainingSpaceForIds = this.MAX_VIDEO_SUPPORT
 
     // fetch the playlists here (populate)
     try {
@@ -155,29 +157,33 @@ export default class YtDetails extends Youtube {
         idStrArr.splice(currPlaylistIndxInIdStrArr + remainingSpaceForIds + 1)
       })
     } catch (error: unknown) {
-      throw Err.setStatus("InternalServerError").setMessage(
-        "Something went wrong!"
+      throw Err.setStatus('InternalServerError').setMessage(
+        'Something went wrong!'
       )
     }
 
     return idStrArr
   }
 
-  private getVideoIdsString = (videosIdsArray: (string | string[])[]) => {
+  private readonly getVideoIdsString = (
+    videosIdsArray: Array<string | string[]>
+  ) => {
     let videoIdsString = videosIdsArray.toString()
 
-    videoIdsString = videoIdsString.replace(/,+/g, ",") // string cleanup
+    videoIdsString = videoIdsString.replace(/,+/g, ',') // string cleanup
 
-    if (videoIdsString.startsWith(","))
+    if (videoIdsString.startsWith(',')) {
       videoIdsString = videoIdsString.slice(1, videoIdsString.length)
-    if (videoIdsString.endsWith(","))
+    }
+    if (videoIdsString.endsWith(',')) {
       videoIdsString = videoIdsString.slice(0, videoIdsString.length - 1)
+    }
 
     return videoIdsString
   }
 
   // get total length in seconds from the duration string
-  private getTotalLengthInSeconds = (durationStr: string) => {
+  private readonly getTotalLengthInSeconds = (durationStr: string) => {
     const regEx = /\d+[HMS]/g
 
     const match = durationStr.match(regEx)
@@ -192,7 +198,7 @@ export default class YtDetails extends Youtube {
     const totalLength = match.reduce((acc: number, curr: string) => {
       const number = Number(curr.slice(0, -1))
 
-      const lastAlphabet = curr[curr.length - 1] as "H" | "M" | "S"
+      const lastAlphabet = curr[curr.length - 1] as 'H' | 'M' | 'S'
       acc += number * suffix[lastAlphabet]
 
       return acc

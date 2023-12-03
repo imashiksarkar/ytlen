@@ -1,12 +1,12 @@
-import axios from "axios"
-import { Err } from "http-staror"
-import { validatedEnv } from "./utils"
+import axios from 'axios'
+import { Err } from 'http-staror'
+import { validatedEnv } from './utils'
 
 export interface IAxiosResponseType {
   data: {
     pageInfo: { totalResults: number; resultsPerPage: number }
     nextPageToken: string
-    items: {
+    items: Array<{
       snippet: {
         resourceId: {
           videoId: string
@@ -15,14 +15,16 @@ export interface IAxiosResponseType {
       contentDetails: {
         duration: string
       }
-    }[]
+    }>
   }
 }
 
 export default class Youtube {
-  private API_KEY = validatedEnv.apiKey
-  private PLAYLIST_URL = `https://www.googleapis.com/youtube/v3/playlistItems`
-  private VIDEOS_URL = `https://www.googleapis.com/youtube/v3/videos`
+  private readonly API_KEY = validatedEnv.apiKey
+  private readonly PLAYLIST_URL =
+    'https://www.googleapis.com/youtube/v3/playlistItems'
+
+  private readonly VIDEOS_URL = 'https://www.googleapis.com/youtube/v3/videos'
   protected MAX_VIDEO_SUPPORT = 600
   protected RESULTS_PER_PAGE = 50 // max 50
   protected VIDEO_ID_LENGTH = 11 // fixed
@@ -41,7 +43,7 @@ export default class Youtube {
       try {
         const { data } = (await axios.get(this.PLAYLIST_URL, {
           params: {
-            part: "snippet",
+            part: 'snippet',
             maxResults: this.RESULTS_PER_PAGE,
             playlistId,
             pageToken,
@@ -54,8 +56,9 @@ export default class Youtube {
 
         if (!this.totalResults) {
           this.totalResults = data.pageInfo.totalResults
-          if (data.pageInfo.totalResults > this.MAX_VIDEO_SUPPORT)
+          if (data.pageInfo.totalResults > this.MAX_VIDEO_SUPPORT) {
             this.totalResults = this.MAX_VIDEO_SUPPORT
+          }
         }
 
         // push all the video id's into the "videoIdsArr" array
@@ -65,10 +68,10 @@ export default class Youtube {
 
         if (!pageToken) break
       } catch (error) {
-        throw Err.setStatus("BadRequest")
-          .setMessage("Invalid Playlist ID!")
+        throw Err.setStatus('BadRequest')
+          .setMessage('Invalid Playlist ID!')
           .setFilePath(__dirname)
-          .setWhere("getVideoIdsForAPlaylist()")
+          .setWhere('getVideoIdsForAPlaylist()')
       }
     }
 
@@ -79,7 +82,7 @@ export default class Youtube {
     // request for every 50 videos (if possible)
     return await axios.get<unknown, IAxiosResponseType>(this.VIDEOS_URL, {
       params: {
-        part: "contentDetails",
+        part: 'contentDetails',
         id: videosString,
         key: this.API_KEY,
       },
