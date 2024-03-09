@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import Youtube from './Youtube'
+import Youtube from '../libs/Youtube'
 
 describe.only('Youtube', () => {
   // const ytLib = new Youtube()

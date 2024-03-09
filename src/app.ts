@@ -12,6 +12,7 @@ import logger from './libs/utils/logger'
 import errorMiddleware from './middlewares/error.mw'
 import notFound from './middlewares/notFound.mw'
 import route from './routes'
+import { promisify } from './libs/utils'
 
 const app = express()
 
@@ -47,6 +48,8 @@ const bootstrap = async (port: number): Promise<void> => {
     logger.info(logString)
     if (ValidatedEnv.nodeEnv === 'production') console.info(logString)
   })
+
+  // const promisifiedServer = promisify(server.close)
 
   gracefulShutdown(server)
 }

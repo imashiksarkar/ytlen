@@ -1,4 +1,4 @@
-import YtService from "./youtube.service"
+import YtService from "../services/youtube.service"
 
 const ytService = new YtService()
 
