@@ -1,6 +1,7 @@
-import type { Request, Response } from "express"
-import { type Err } from "http-staror"
-import logger from "../libs/utils/logger"
+import type { Request, Response } from 'express'
+import { type Err } from 'http-staror'
+import logger from '../libs/utils/logger'
+import { type NextFn } from '../libs/utils/types'
 
 const errorMiddleware = (
   err: Err,

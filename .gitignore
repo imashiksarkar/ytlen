@@ -1,6 +1,5 @@
 node_modules/
 .env
-src/__test__/
 __raff__
 dist
 logs

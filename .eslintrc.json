@@ -1,0 +1,27 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": "standard-with-typescript",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-trailing-spaces": "error",
+    "@typescript-eslint/strict-boolean-expressions": "warn",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-throw-literal": "warn",
+    "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+    "@typescript-eslint/quotes": "warn",
+    "@typescript-eslint/member-delimiter-style": "warn",
+    "@typescript-eslint/comma-dangle": "warn",
+    "@typescript-eslint/no-misused-promises": "warn"
+  },
+  "ignorePatterns": [
+    "src/__raff__/**/*.ts",
+    "src/__test__/**/*.ts",
+    "src/**/*.spec.ts"
+  ]
+}

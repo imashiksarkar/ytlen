@@ -1,85 +1,208 @@
-import Youtube from "../libs/Youtube"
-import { Err } from "http-staror"
+import { Err } from 'http-staror'
+import Youtube, { type IAxiosResponseType } from '../libs/Youtube'
 
-type ResReturnType = Promise<{
+interface IDurationReturnType {
   length: number
   totalResults: number
-  resultsPerPage: number
-}>
+}
 
 export default class YtDetails extends Youtube {
-  // extract playlist id from the playlist url
-  private getPlaylistId = (playlistLink: string): string => {
-    const regex = /playlist\?list=([a-zA-Z0-9_-]+)/
+  getDuration = async (urls: string): Promise<IDurationReturnType> => {
+    const urlStringsArray = this.parseVideosAndPlaylistsIdsFromUrl(urls)
 
-    const match = playlistLink.match(regex)
-
-    if (!match)
-      throw Err.setStatus("BadRequest")
-        .setMessage("Invalid Playlist Url!")
-        .setWhere("getPlaylistId()")
-
-    return match[1]
-  }
-
-  // extract video id from the video url
-  private getVideoIdFromASingleVideo = (videoUrl: string) => {
-    const regex = /https:\/\/youtu.be\/([a-zA-Z0-9_-]+)/
-    const idFound = videoUrl.match(regex)
-
-    if (!idFound) {
-      throw Err.setStatus("BadRequest")
-        .setMessage("Invalid Video Url!")
-        .setWhere("getSingleVideoDetails()")
+    if (!urlStringsArray) {
+      throw Err.setStatus('BadRequest').setMessage('Url is invalid!')
     }
-    return idFound[1]
-  }
 
-  // returns playlist duration details given a playlist url
-  getPlaylistDetails = async (playlistURL: string): ResReturnType => {
-    // eslint-disable-next-line no-useless-catch
-    try {
-      const playlistId = this.getPlaylistId(playlistURL)
-      const videoIdsArr = await this.getVideoIdsForAPlaylist(playlistId)
-      const videosDurationString = await this.getVideosDurationString(
-        videoIdsArr
+    const videoIdsArr = await this.getVideosIdsArray(urlStringsArray)
+
+    const videoIdsString = this.getVideoIdsString(videoIdsArr)
+
+    if (videoIdsString.length < 11) {
+      throw Err.setStatus('BadRequest').setMessage('Invalid Url!')
+    }
+
+    const fetchVideosDurationPromises: Array<Promise<IAxiosResponseType>> = []
+
+    this.strSlice(videoIdsString, (slicedVideoIdsString: string) => {
+      // loop for every 50 videos ( promise.all() )
+      fetchVideosDurationPromises.push(
+        this.fetchVideosDuration(slicedVideoIdsString)
       )
+    })
 
-      const totalLengthInSec =
-        this.getTotalLengthInSeconds(videosDurationString)
+    const videosDuration = await Promise.all(fetchVideosDurationPromises)
 
-      return {
-        length: totalLengthInSec,
-        resultsPerPage: this.RESULTS_PER_PAGE,
-        totalResults: this.totalResults,
-      }
-    } catch (error) {
-      throw error
+    let totalResults = 0
+    let totalDurationString = ''
+    videosDuration.forEach((duration) => {
+      totalResults += duration.data.pageInfo.totalResults
+      const durationString = this.getDurationString(duration)
+      totalDurationString += durationString
+    })
+
+    return {
+      length: this.getTotalLengthInSeconds(totalDurationString),
+      totalResults,
     }
   }
 
-  // returns a video ids' array given a video urls' array
-  getAllVideoIds = (urlArr: string[]): string[] => {
-    return urlArr.map((url) => this.getVideoIdFromASingleVideo(url))
+  private readonly strSlice = (videoIds: string, cb: (res: string) => void) => {
+    const numberOfIdsAtOnce = 50
+    const idLen = numberOfIdsAtOnce * 11 + (numberOfIdsAtOnce - 1)
+
+    let start = 0
+    let end = idLen
+
+    while (true) {
+      const strChunk = videoIds.slice(start, end)
+      if (strChunk.length < 10) break
+      start = end + 1
+      end = start + idLen
+      cb(strChunk)
+    }
   }
 
-  // returns videos duration given one or multiple videos url
-  getVideoDetails = async (url: string): ResReturnType => {
-    const urlArr = url.split(";") // video url's array
-    const videoIdArr = this.getAllVideoIds(urlArr)
+  private readonly getDurationString = (duration: IAxiosResponseType) =>
+    duration.data.items.reduce(
+      (prev, currItem) => prev + currItem.contentDetails.duration,
+      ''
+    )
 
-    // eslint-disable-next-line no-useless-catch
-    try {
-      const vidDurationStr = await this.getVideosDurationString(videoIdArr)
-      const durationInSec = this.getTotalLengthInSeconds(vidDurationStr)
+  private readonly isVideoId = (id: string) =>
+    id.length === this.VIDEO_ID_LENGTH
 
-      return {
-        length: durationInSec,
-        resultsPerPage: 1,
-        totalResults: videoIdArr.length,
+  private readonly isPlaylistId = (id: string) =>
+    id.length === this.PLAYLIST_ID_LENGTH
+
+  // videos ids will have "/" and playlist ids will have "=" as prefix
+  private readonly parseVideosAndPlaylistsIdsFromUrl = (url: string) =>
+    url
+      .match(/(\/[a-z0-9_-]{11})|(=[a-z0-9_-]{34})/gi)
+      ?.map((idWithPrefix) => idWithPrefix.slice(1))
+
+  /**
+   *
+   * @param videosAndPlaylistsIdsFromUrl
+   * @returns fetchIds[
+   * vid-1,
+   * [p-1, p-2],
+   * vid-2
+   * ]
+   */
+  private readonly getVideosIdsArray = async (
+    videosAndPlaylistsIdsFromUrl: string[]
+  ) => {
+    const numberOfIdsAtOnce = 50
+
+    const idStrArr: Array<string | string[]> = []
+    const mapPlylstIndxToIdStrArr: number[] = []
+    // promises of playlist fetch
+    const playlistsPromises: Array<Promise<string[]>> = []
+
+    // const playlistsIndexesAndPromises: [number[]] = [[], []]
+
+    const maxLoopTime = Math.min(
+      videosAndPlaylistsIdsFromUrl?.length || 0,
+      numberOfIdsAtOnce
+    )
+
+    for (let i = 0; i < maxLoopTime; i++) {
+      const id = videosAndPlaylistsIdsFromUrl[i]
+
+      if (this.isVideoId(id)) {
+        idStrArr.push(id)
+      } else if (this.isPlaylistId(id)) {
+        // current index is to be populated
+        mapPlylstIndxToIdStrArr.push(idStrArr.length)
+
+        // store the promises
+        playlistsPromises.push(this.getVideoIdsByPlaylistId(id))
+
+        // add empty array for now, later it will be populated with actual array of video ids
+        idStrArr.push([])
       }
-    } catch (error) {
-      throw error
     }
+
+    let numberOfIdsFilled = 0
+    let remainingSpaceForIds = this.MAX_VIDEO_SUPPORT
+
+    //---- fetch the playlists here (populate) ----
+
+    const resolvedPlaylists = await Promise.all(playlistsPromises)
+
+    mapPlylstIndxToIdStrArr.forEach((currPlaylistIndxInIdStrArr, index) => {
+      // for the first time, number of previously filled ids
+      if (index === 0) {
+        numberOfIdsFilled = currPlaylistIndxInIdStrArr
+        remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
+      } else {
+        // here index can't be 0
+
+        const prevPlylstIndxInIdStrArr = mapPlylstIndxToIdStrArr[index - 1]
+
+        // the number of video ids are skipped between two playlist ids
+        const skippedIds =
+          currPlaylistIndxInIdStrArr - prevPlylstIndxInIdStrArr - 1
+
+        numberOfIdsFilled += skippedIds
+        remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
+      }
+
+      const currentPlaylist = resolvedPlaylists[index]
+      currentPlaylist.splice(remainingSpaceForIds) // fix the current playlist size
+
+      // calculate the remaining's and filled's
+      numberOfIdsFilled += currentPlaylist.length
+      remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
+
+      // populate the playlist ids
+      idStrArr[currPlaylistIndxInIdStrArr] = currentPlaylist
+      idStrArr.splice(currPlaylistIndxInIdStrArr + remainingSpaceForIds + 1)
+    })
+
+    return idStrArr
+  }
+
+  private readonly getVideoIdsString = (
+    videosIdsArray: Array<string | string[]>
+  ) => {
+    let videoIdsString = videosIdsArray.toString()
+
+    videoIdsString = videoIdsString.replace(/,+/g, ',') // string cleanup
+
+    if (videoIdsString.startsWith(',')) {
+      videoIdsString = videoIdsString.slice(1, videoIdsString.length)
+    }
+    if (videoIdsString.endsWith(',')) {
+      videoIdsString = videoIdsString.slice(0, videoIdsString.length - 1)
+    }
+
+    return videoIdsString
+  }
+
+  // get total length in seconds from the duration string
+  private readonly getTotalLengthInSeconds = (durationStr: string) => {
+    const regEx = /\d+[HMS]/g
+
+    const match = durationStr.match(regEx)
+    if (!match) return 0
+
+    const suffix = {
+      H: 60 * 60,
+      M: 60,
+      S: 1,
+    }
+
+    const totalLength = match.reduce((acc: number, curr: string) => {
+      const number = Number(curr.slice(0, -1))
+
+      const lastAlphabet = curr[curr.length - 1] as 'H' | 'M' | 'S'
+      acc += number * suffix[lastAlphabet]
+
+      return acc
+    }, 0)
+
+    return totalLength
   }
 }
