@@ -1,21 +1,24 @@
 {
   "compilerOptions": {
     /* Language and Environment */
-    "target": "ES2022" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "target": "ES2022",
+
     /* Modules */
-    "moduleResolution": "NodeNext" /* Specify what module code is generated. */,
-    "module": "NodeNext" /* Specify what module code is generated. */,
-    "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "noEmitOnError": true /* Do not compile while having error */,
-    "removeComments": true /* Disable emitting comments. */,
-    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
-    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "noEmitOnError": true,
+    "removeComments": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
     /* Type Checking */
-    "strict": true /* Enable all strict type-checking options. */,
+    "strict": true,
+
     /* Completeness */
-    "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true
   },
   "exclude": [
     "src/__raff__",

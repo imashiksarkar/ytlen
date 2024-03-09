@@ -19,19 +19,27 @@ export interface IAxiosResponseType {
   }
 }
 
-export default class Youtube {
-  private readonly API_KEY = validatedEnv.apiKey
-  private readonly PLAYLIST_URL =
-    'https://www.googleapis.com/youtube/v3/playlistItems'
-
-  private readonly VIDEOS_URL = 'https://www.googleapis.com/youtube/v3/videos'
+export default abstract class Youtube {
   protected MAX_VIDEO_SUPPORT = 600
-  protected RESULTS_PER_PAGE = 50 // max 50
-  protected VIDEO_ID_LENGTH = 11 // fixed
-  protected totalResults = 0
+  private totalResults = 0
 
-  // get all the video ids' for the playlist (Max 600 videos)
-  protected fetchPlaylist = async (playlistId: string): Promise<string[]> => {
+  // used in inherited classes
+  protected PLAYLIST_ID_LENGTH = 34
+  protected VIDEO_ID_LENGTH = 11
+
+  private readonly API_KEY = validatedEnv.apiKey
+  private readonly PLAYLIST_URL = `https://www.googleapis.com/youtube/v3/playlistItems`
+  private readonly VIDEOS_URL = `https://www.googleapis.com/youtube/v3/videos`
+  private readonly RESULTS_PER_PAGE = 50 // max 50
+
+  /**
+   *
+   * @param playlistId must be 34 characters long
+   * @returns video ids of the playlist (min 0, max 600)
+   */
+  protected getVideoIdsByPlaylistId = async (
+    playlistId: string
+  ): Promise<string[]> => {
     let pageToken: string | null = null
     const videoIdsArr: string[] = []
 

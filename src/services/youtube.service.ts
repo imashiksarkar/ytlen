@@ -48,7 +48,7 @@ export default class YtDetails extends Youtube {
   }
 
   private readonly strSlice = (videoIds: string, cb: (res: string) => void) => {
-    const numberOfIdsAtOnce = this.RESULTS_PER_PAGE
+    const numberOfIdsAtOnce = 50
     const idLen = numberOfIdsAtOnce * 11 + (numberOfIdsAtOnce - 1)
 
     let start = 0
@@ -69,9 +69,11 @@ export default class YtDetails extends Youtube {
       ''
     )
 
-  private readonly isVideoId = (id: string) => id.length === 11
+  private readonly isVideoId = (id: string) =>
+    id.length === this.VIDEO_ID_LENGTH
 
-  private readonly isPlaylistId = (id: string) => id.length === 34
+  private readonly isPlaylistId = (id: string) =>
+    id.length === this.PLAYLIST_ID_LENGTH
 
   // videos ids will have "/" and playlist ids will have "=" as prefix
   private readonly parseVideosAndPlaylistsIdsFromUrl = (url: string) =>
@@ -91,6 +93,8 @@ export default class YtDetails extends Youtube {
   private readonly getVideosIdsArray = async (
     videosAndPlaylistsIdsFromUrl: string[]
   ) => {
+    const numberOfIdsAtOnce = 50
+
     const idStrArr: Array<string | string[]> = []
     const mapPlylstIndxToIdStrArr: number[] = []
     // promises of playlist fetch
@@ -100,7 +104,7 @@ export default class YtDetails extends Youtube {
 
     const maxLoopTime = Math.min(
       videosAndPlaylistsIdsFromUrl?.length || 0,
-      this.RESULTS_PER_PAGE
+      numberOfIdsAtOnce
     )
 
     for (let i = 0; i < maxLoopTime; i++) {
@@ -113,7 +117,7 @@ export default class YtDetails extends Youtube {
         mapPlylstIndxToIdStrArr.push(idStrArr.length)
 
         // store the promises
-        playlistsPromises.push(this.fetchPlaylist(id))
+        playlistsPromises.push(this.getVideoIdsByPlaylistId(id))
 
         // add empty array for now, later it will be populated with actual array of video ids
         idStrArr.push([])
@@ -123,44 +127,39 @@ export default class YtDetails extends Youtube {
     let numberOfIdsFilled = 0
     let remainingSpaceForIds = this.MAX_VIDEO_SUPPORT
 
-    // fetch the playlists here (populate)
-    try {
-      const resolvedPlaylists = await Promise.all(playlistsPromises)
+    //---- fetch the playlists here (populate) ----
 
-      mapPlylstIndxToIdStrArr.forEach((currPlaylistIndxInIdStrArr, index) => {
-        // for the first time, number of previously filled ids
-        if (index === 0) {
-          numberOfIdsFilled = currPlaylistIndxInIdStrArr
-          remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
-        } else {
-          // here index can't be 0
+    const resolvedPlaylists = await Promise.all(playlistsPromises)
 
-          const prevPlylstIndxInIdStrArr = mapPlylstIndxToIdStrArr[index - 1]
-
-          // the number of video ids are skipped between two playlist ids
-          const skippedIds =
-            currPlaylistIndxInIdStrArr - prevPlylstIndxInIdStrArr - 1
-
-          numberOfIdsFilled += skippedIds
-          remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
-        }
-
-        const currentPlaylist = resolvedPlaylists[index]
-        currentPlaylist.splice(remainingSpaceForIds) // fix the current playlist size
-
-        // calculate the remaining's and filled's
-        numberOfIdsFilled += currentPlaylist.length
+    mapPlylstIndxToIdStrArr.forEach((currPlaylistIndxInIdStrArr, index) => {
+      // for the first time, number of previously filled ids
+      if (index === 0) {
+        numberOfIdsFilled = currPlaylistIndxInIdStrArr
         remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
+      } else {
+        // here index can't be 0
 
-        // populate the playlist ids
-        idStrArr[currPlaylistIndxInIdStrArr] = currentPlaylist
-        idStrArr.splice(currPlaylistIndxInIdStrArr + remainingSpaceForIds + 1)
-      })
-    } catch (error: unknown) {
-      throw Err.setStatus('InternalServerError').setMessage(
-        'Something went wrong!'
-      )
-    }
+        const prevPlylstIndxInIdStrArr = mapPlylstIndxToIdStrArr[index - 1]
+
+        // the number of video ids are skipped between two playlist ids
+        const skippedIds =
+          currPlaylistIndxInIdStrArr - prevPlylstIndxInIdStrArr - 1
+
+        numberOfIdsFilled += skippedIds
+        remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
+      }
+
+      const currentPlaylist = resolvedPlaylists[index]
+      currentPlaylist.splice(remainingSpaceForIds) // fix the current playlist size
+
+      // calculate the remaining's and filled's
+      numberOfIdsFilled += currentPlaylist.length
+      remainingSpaceForIds = this.MAX_VIDEO_SUPPORT - numberOfIdsFilled
+
+      // populate the playlist ids
+      idStrArr[currPlaylistIndxInIdStrArr] = currentPlaylist
+      idStrArr.splice(currPlaylistIndxInIdStrArr + remainingSpaceForIds + 1)
+    })
 
     return idStrArr
   }
