@@ -35,7 +35,7 @@ export default abstract class Youtube {
   /**
    *
    * @param playlistId must be 34 characters long
-   * @returns video ids of the playlist (min 0, max 600)
+   * @returns video IDs of the playlist (min 0, max 600)
    */
   protected getVideoIdsByPlaylistId = async (
     playlistId: string
