@@ -21,7 +21,6 @@ export interface IAxiosResponseType {
 
 export default abstract class Youtube {
   protected MAX_VIDEO_SUPPORT = 600
-  private totalResults = 0
 
   // used in inherited classes
   protected PLAYLIST_ID_LENGTH = 34
@@ -31,6 +30,7 @@ export default abstract class Youtube {
   private readonly PLAYLIST_URL = `https://www.googleapis.com/youtube/v3/playlistItems`
   private readonly VIDEOS_URL = `https://www.googleapis.com/youtube/v3/videos`
   private readonly RESULTS_PER_PAGE = 50 // max 50
+  private totalResults = 0
 
   /**
    *
